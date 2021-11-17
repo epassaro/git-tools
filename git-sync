@@ -1,0 +1,9 @@
+#! /bin/bash
+
+set -e
+
+git fetch --prune --prune-tags "$1"
+git reset --hard "$1/$2"
+git push origin "$(git branch --show-current)" --force --tags
+
+exit 0

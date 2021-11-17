@@ -1,0 +1,41 @@
+#! /usr/bin/env python3
+
+import sys
+import subprocess
+import json
+from functools import reduce
+
+def run_cmd(cmd):
+    cmd = cmd.split()
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    universal_newlines=True)
+    output, error = process.communicate()
+    return output, error
+
+output, error = run_cmd("git remote get-url origin")
+base_url = ("https://github.com/", "git@github.com:")
+if output.startswith(base_url):
+    gh_repo = reduce(lambda x, y: x.strip(y), base_url + (None, ".git"), output)
+
+else:
+    print("fatal: 'origin' remote is not a GitHub repository.")
+    sys.exit(1)
+
+output, error = run_cmd(f"curl -s https://api.github.com/repos/{gh_repo}")
+response = json.loads(output)
+try:
+    parent_url = response["parent"]["clone_url"]
+
+except KeyError:
+    print("fatal: 'origin' remote is not a fork.")
+    sys.exit(2)
+
+print("Setting up 'upstream' remote.")
+output, error = run_cmd(f"git remote add upstream {parent_url}")
+
+print("Enabling pull request fetch.")
+output, error = run_cmd("git config --add remote.upstream.fetch \"+refs/pull/*/head:refs/remotes/upstream/pr/*\"")
+
+
+sys.exit(0)
