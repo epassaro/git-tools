@@ -18,7 +18,7 @@ git checkout feature
 git sync upstream main
 ```
 
-This script will make your local `feature` and remote `origin/feature` branch identical to `upstream/main`.
+That will make your local `feature` and remote `origin/feature` branch identical to `upstream/main`.
 
 ### `git setup`
 
