@@ -3,7 +3,6 @@
 import sys
 import subprocess
 import json
-from functools import reduce
 
 def run_cmd(cmd):
     cmd = cmd.split()
@@ -16,7 +15,10 @@ def run_cmd(cmd):
 output, error = run_cmd("git remote get-url origin")
 base_url = ("https://github.com/", "git@github.com:")
 if output.startswith(base_url):
-    gh_repo = reduce(lambda x, y: x.strip(y), base_url + (None, ".git"), output)
+    gh_repo = output.strip() 
+    gh_repo = gh_repo.replace(base_url[0], "")
+    gh_repo = gh_repo.replace(base_url[1], "")
+    gh_repo = gh_repo.replace(".git", "")
 
 else:
     print("fatal: 'origin' remote is not a GitHub repository.")
@@ -35,7 +37,7 @@ print("Setting up 'upstream' remote.")
 output, error = run_cmd(f"git remote add upstream {parent_url}")
 
 print("Enabling pull request fetch.")
-output, error = run_cmd("git config --add remote.upstream.fetch \"+refs/pull/*/head:refs/remotes/upstream/pr/*\"")
+output, error = run_cmd("git config --add remote.upstream.fetch +refs/pull/*/head:refs/remotes/upstream/pr/*")
 
 
 sys.exit(0)
